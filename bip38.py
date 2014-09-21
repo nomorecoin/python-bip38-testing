@@ -136,3 +136,73 @@ def compresstest():
             print('Expected %s' %(expectedwif))
             print('Returned %s' %(decryptedpriv))
         print('-'*80)
+
+if __name__ == '__main__':
+    import sys
+    import getpass
+
+    if 1 < len(sys.argv) < 4 and sys.argv[1] == '-d':
+        if len(sys.argv) > 2:
+            enckey = sys.argv[2]
+        else:
+            if sys.stdin.isatty():
+                enckey = raw_input('BIP38 Encrypted Privkey: ').strip()
+            else:
+                enckey = raw_input().strip()
+
+        try:
+            base58.b58encode_check(enckey)
+        except AssertionError:
+            sys.stderr.write('Invalid BIP38 privkey.\n')
+            sys.exit(1)
+
+        if sys.stdin.isatty():
+            passwd = getpass.getpass('Password: ')
+        else:
+            passwd = raw_input()
+
+        try:
+            privkey = bip38_decrypt(enckey, passwd)
+        except AddressVerificationFailure:
+            sys.stderr.write('Invalid password.\n')
+            sys.exit(2)
+
+        if sys.stdout.isatty(): print('')
+        print(privkey)
+
+    elif len(sys.argv) == 1 or sys.argv[1] != '--help':
+        if sys.stdin.isatty():
+            privkey = raw_input('Private key: ').strip()
+        else:
+            privkey = raw_input().strip()
+
+        try:
+            base58.b58encode_check(privkey)
+        except AssertionError:
+            sys.stderr.write('Invalid privkey.')
+            sys.exit(1)
+
+        if sys.stdin.isatty():
+            while True:
+                passwd = getpass.getpass('Password: ')
+                pwconf = getpass.getpass('Confirm Password: ')
+
+                if passwd == pwconf:
+                    break
+                else:
+                    sys.stderr.write("Passwords don't match.\n")
+        else:
+            passwd = raw_input()
+
+        try:
+            if sys.stdout.isatty(): print('')
+            print(bip38_encrypt(privkey, passwd))
+        except AssertionError:
+            sys.stderr.write('Invalid privkey.\n')
+            sys.exit(1)
+
+    else:
+        sys.stderr.write(
+'''%s   # Generate a BIP38 privkey from a normal privkey.
+%s -d [bip38_encrypted_key]   # Decrypt a BIP38 encrypted key.
+'''.replace('%s', sys.argv[0]))
