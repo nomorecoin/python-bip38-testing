@@ -108,7 +108,7 @@ def runtests():
         decryptedpriv = bip38_decrypt(resultpriv,passphrase)
         if decryptedpriv == expectedwif:
             print('Decryption Success!')
-        print('-')*80
+        print('-'*80)
         
 def compresstest():
     for test in compresstests:
@@ -131,4 +131,4 @@ def compresstest():
             print('Decryption Failed!')
             print('Expected %s' %(expectedwif))
             print('Returned %s' %(decryptedpriv))
-        print('-')*80
+        print('-'*80)
