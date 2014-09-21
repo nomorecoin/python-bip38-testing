@@ -6,3 +6,27 @@ Encrypt function based on modified code from https://github.com/sowbug/cold-wall
 Thanks to /u/thatdontmakenosense for finishing the decrypt function  
   
 
+CLI Usage
+---------
+
+	# Create a new BIP38 encrypted key.
+	$ ./bip38.py
+	Private key: <YourPrivkeyGoesHere>
+	Password: <YourPasswordGoesHere>
+	Confirm Password: <YourPasswordGoesHereToo>
+
+	<AndYourShinyNewBIP38KeyComesOutHere>
+
+	# Decrypt a BIP38 encrypted key.
+	$ ./bip38.py -d
+	BIP38 Encrypted Privkey: <EncryptedPrivkeyIn>
+	Password: <YourPassword>
+
+	<PlaintextPrivkeyOut>
+
+	# or
+
+	$ ./bip38.py -d <EncryptedPrivkeyIn>
+	Password: <YourPassword>
+
+	<PlaintextPrivkeyOut>
