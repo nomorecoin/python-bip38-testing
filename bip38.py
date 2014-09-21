@@ -14,6 +14,10 @@ import base58
 # TODO:
 # verify encrypted privkey checksum before decrypting?
 
+class AddressVerificationFailure(StandardError):
+    """This exception is raised if a decryption result fails address
+    verification."""
+
 
 tests = [{'passphrase':'TestingOneTwoThree',
           'expectedpriv':"6PRVWUbkzzsbcVac2qwfssoUJAN1Xhrg6bNk8J7Nzm5H7kxEbn2Nh2ZoGg",
@@ -62,7 +66,7 @@ def bip38_encrypt(privkey,passphrase):
     encrypted_privkey = base58.b58encode(encrypted_privkey)
     return encrypted_privkey
 
-def bip38_decrypt(encrypted_privkey,passphrase):
+def bip38_decrypt(encrypted_privkey,passphrase,verify_key=True):
     '''BIP0038 non-ec-multiply decryption. Returns WIF privkey.'''
     d = base58.b58decode(encrypted_privkey)
     d = d[2:]
@@ -92,7 +96,7 @@ def bip38_decrypt(encrypted_privkey,passphrase):
         wif = encode_privkey(priv,'wif')
     addr = pubtoaddr(pub)
     if hashlib.sha256(hashlib.sha256(addr).digest()).digest()[0:4] != addresshash:
-        print('Addresshash verification failed! Password is likely incorrect.')
+        if verify_key: raise(AddressVerificationFailure)
     return wif
 
 def runtests():
