@@ -170,6 +170,26 @@ if __name__ == '__main__':
         if sys.stdout.isatty(): print('')
         print(privkey)
 
+    elif len(sys.argv) == 2 and sys.argv[1] == '-m':
+        passwd = raw_input('Password: ')
+        keys = []
+        while True:
+            key = raw_input('Private key: ')
+            if key == '': break
+            keys.append(key)
+
+        exit_code = 0
+        for privkey in keys:
+            try:
+                enckey = bip38_encrypt(privkey, passwd)
+                addr = privkey_to_address(privkey)
+                print(addr + ': ' + enckey)
+            except:
+                sys.stderr.write('Invalid privkey: %s.\n' % privkey)
+                exit_code = 1
+
+        sys.exit(exit_code)
+
     elif len(sys.argv) == 1 or sys.argv[1] != '--help':
         if sys.stdin.isatty():
             privkey = raw_input('Private key: ').strip()
@@ -205,4 +225,5 @@ if __name__ == '__main__':
         sys.stderr.write(
 '''%s   # Generate a BIP38 privkey from a normal privkey.
 %s -d [bip38_encrypted_key]   # Decrypt a BIP38 encrypted key.
+%s -m # Generate multiple BIP38 privkeys with a single passphrase.
 '''.replace('%s', sys.argv[0]))

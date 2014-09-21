@@ -30,3 +30,12 @@ CLI Usage
 	Password: <YourPassword>
 
 	<PlaintextPrivkeyOut>
+
+	# Create many BIP38 keys with the same passphrase.
+	$ ./bip38.py -m
+	Password: <yourpassword>
+	Private key: <privkey1>
+	Private key: <privkey2>
+	Private key: <ENTER>
+	<address1>: <encryptedprivkey1>
+	<address2>: <encryptedprivkey2>
