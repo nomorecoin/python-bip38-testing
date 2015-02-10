@@ -33,23 +33,23 @@ compresstests = [{'passphrase':'TestingOneTwoThree',
                   'expectedwif':"KwYgW8gcxj1JWJXhPSu4Fqwzfhp5Yfi42mdYmMa4XqK7NJxXUSK7",
                   'expectedaddr':"1HmPbwsvG5qJ3KJfxzsZRZWhbm1xBMuS8B"}]
 
-def bip38_encrypt(privkey,passphrase):
+def bip38_encrypt(privkey, passphrase, vbyte=0):
     '''BIP0038 non-ec-multiply encryption. Returns BIP0038 encrypted privkey.'''
     privformat = get_privkey_format(privkey)
     if privformat in ['wif_compressed','hex_compressed']:
         compressed = True
         flagbyte = '\xe0'
         if privformat == 'wif_compressed':
-            privkey = encode_privkey(privkey,'hex_compressed')
+            privkey = encode_privkey(privkey,'hex_compressed', vbyte)
             privformat = get_privkey_format(privkey)
     if privformat in ['wif', 'hex']:
         compressed = False
         flagbyte = '\xc0'
     if privformat == 'wif':
-        privkey = encode_privkey(privkey,'hex')
+        privkey = encode_privkey(privkey, 'hex', vbyte)
         privformat = get_privkey_format(privkey)
     pubkey = privtopub(privkey)
-    addr = pubtoaddr(pubkey)
+    addr = pubtoaddr(pubkey, vbyte)
     addresshash = hashlib.sha256(hashlib.sha256(addr).digest()).digest()[0:4]
     key = scrypt.hash(passphrase, addresshash, 16384, 8, 8)
     derivedhalf1 = key[0:32]
@@ -62,7 +62,7 @@ def bip38_encrypt(privkey,passphrase):
     encrypted_privkey = base58.b58encode(encrypted_privkey)
     return encrypted_privkey
 
-def bip38_decrypt(encrypted_privkey,passphrase):
+def bip38_decrypt(encrypted_privkey, passphrase, vbyte=0):
     '''BIP0038 non-ec-multiply decryption. Returns WIF privkey.'''
     d = base58.b58decode(encrypted_privkey)
     d = d[2:]
@@ -86,11 +86,11 @@ def bip38_decrypt(encrypted_privkey,passphrase):
     priv = binascii.unhexlify('%064x' % (long(binascii.hexlify(priv), 16) ^ long(binascii.hexlify(derivedhalf1), 16)))
     pub = privtopub(priv)
     if compressed:
-        pub = encode_pubkey(pub,'hex_compressed')
-        wif = encode_privkey(priv,'wif_compressed')
+        pub = encode_pubkey(pub, 'hex_compressed', vbyte)
+        wif = encode_privkey(priv, 'wif_compressed', vbyte)
     else:
-        wif = encode_privkey(priv,'wif')
-    addr = pubtoaddr(pub)
+        wif = encode_privkey(priv,'wif', vbyte)
+    addr = pubtoaddr(pub, vbyte)
     if hashlib.sha256(hashlib.sha256(addr).digest()).digest()[0:4] != addresshash:
         print('Addresshash verification failed! Password is likely incorrect.')
     return wif
